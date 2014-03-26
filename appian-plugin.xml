@@ -1,0 +1,35 @@
+<appian-plugin name="Appian Plugins for Glass" key="com.appian.googleglass.plugins">
+
+  <plugin-info>
+    <description>Appian Plugins for Glass</description>
+    <vendor name="Appian Corporation" url="http://www.appian.com"/>
+    <version>1.0.1</version>
+    <application-version min="7.4.0"/>
+  </plugin-info>
+
+  <datatype key="GlassAuthType" name="GlassAuthType">
+    <class>com.appian.googleglass.oauth.types.GlassAuthType</class>
+  </datatype>
+
+  <smart-service name="Post TimelineItem to Glass" key="PostTimelineItemtoGlass"
+    class="com.appian.googleglass.mirror.PostTimelineItemActivity"/>
+  <function-category key="googleGlassCategory" name="Google Glass"/>
+  <function key="GetGlassAuthorizationUrlFunction"
+    class="com.appian.googleglass.mirror.auth.GetGlassAuthorizationUrlFunction"/>
+  <servlet name="Appian Glassware Auth Servlet" key="appianGlasswareAuthServlet"
+    class="com.appian.googleglass.mirror.auth.AppianGlasswareAuthServlet">
+    <description>Appian Glassware Auth Servlet</description>
+    <url-pattern>/ok.glass</url-pattern>
+  </servlet>
+  <servlet name="Appian Glassware Notification Servlet" key="appianGlasswareNotificationServlet"
+    class="com.appian.googleglass.mirror.GlasswareMirrorNotifyServlet">
+    <description>Appian Glassware Notification Servlet</description>
+    <url-pattern>/stateless/glass.notify</url-pattern>
+  </servlet>
+
+  <smart-service name="Store Glassware Credentials" key="StoreGlasswareCredentials"
+    class="com.appian.googleglass.mirror.auth.StoreGlasswareCredentialsActivity" />
+
+  <smart-service name="Post TimelineItem from News Event" key="PostTimelineItemfromNewsEvent"
+    class="com.appian.googleglass.mirror.PostTimelineItemFromNewsEventActivity" />
+</appian-plugin>
