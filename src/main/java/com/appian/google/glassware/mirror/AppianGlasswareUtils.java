@@ -1,4 +1,4 @@
-package com.appian.googleglass.mirror;
+package com.appian.google.glassware.mirror;
 
 import java.io.IOException;
 import java.io.InputStream;

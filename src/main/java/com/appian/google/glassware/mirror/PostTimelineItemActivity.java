@@ -1,13 +1,12 @@
-package com.appian.googleglass.mirror;
+package com.appian.google.glassware.mirror;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Collections;
 
 import org.apache.log4j.Logger;
 
-import com.appian.googleglass.oauth.types.GlassAuthType;
+import com.appian.google.glassware.oauth.types.GlassAuthType;
 import com.appiancorp.suiteapi.common.Name;
 import com.appiancorp.suiteapi.process.exceptions.SmartServiceException;
 import com.appiancorp.suiteapi.process.framework.AppianSmartService;
@@ -18,23 +17,28 @@ import com.appiancorp.suiteapi.process.framework.SmartServiceContext;
 import com.appiancorp.suiteapi.process.palette.PaletteInfo;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.mirror.Mirror;
 import com.google.api.services.mirror.model.MenuItem;
-import com.google.api.services.mirror.model.NotificationConfig;
 import com.google.api.services.mirror.model.TimelineItem;
 
 @PaletteInfo(paletteCategory = "Integration Services", palette = "Google Glass Services")
-public class PostTimelineItemFromNewsEventActivity extends AppianSmartService {
+public class PostTimelineItemActivity extends AppianSmartService {
 
-  private static final Logger LOG = Logger.getLogger(PostTimelineItemFromNewsEventActivity.class);
-  private final SmartServiceContext smartServiceCtx;
+  private static final Logger LOG = Logger.getLogger(PostTimelineItemActivity.class);
   private static final String MISSING_PARAMS_ERROR = "error.missing.parameters.userMessage";
   private static final String USER_AUTH_ERROR = "error.auth.userMessage";
   private static final String USER_EXECUTION_ERROR = "error.execution.userMessage";
+  private final SmartServiceContext smartServiceCtx;
+  private static HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+  private static JsonFactory JSON_FACTORY = new JacksonFactory();
   private GlassAuthType authData;
-  private String htmlData;
-  private String moreInfoHtmlData;
-  private String newsEntryEventId;
+  private String text;
+  private String html;
+  private Boolean addDeleteMenu; //This will actually add a REPLY option as well.
   private String timelineId;
 
   @Override
@@ -43,12 +47,10 @@ public class PostTimelineItemFromNewsEventActivity extends AppianSmartService {
     Credential creds = null;
     Mirror service = null;
     TimelineItem card = null;
-    TimelineItem moreInfo = null;
     ArrayList<MenuItem> menus = new ArrayList<MenuItem>();
     // Abort if neither text or html is set
-    if (htmlData == null || htmlData.isEmpty()) {
-      throw createException(new InvalidParameterException(), MISSING_PARAMS_ERROR,
-        MISSING_PARAMS_ERROR, null);
+    if( (text == null || text.isEmpty()) && (html == null || html.isEmpty()) ) {
+      throw createException(new InvalidParameterException(), MISSING_PARAMS_ERROR, MISSING_PARAMS_ERROR, null);
     }
     try {
       // Figure out the impacted user and get their credentials for API calls
@@ -58,37 +60,28 @@ public class PostTimelineItemFromNewsEventActivity extends AppianSmartService {
       throw createException(e, USER_AUTH_ERROR, USER_AUTH_ERROR, null);
     }
     card = new TimelineItem();
-    card.setHtml(htmlData);
-    if (moreInfoHtmlData != null && !moreInfoHtmlData.isEmpty()) {
-      card.setIsBundleCover(Boolean.TRUE);
-      card.setBundleId(newsEntryEventId);
-      moreInfo = new TimelineItem();
-      moreInfo.setHtml(moreInfoHtmlData);
-      moreInfo.setId(newsEntryEventId);
-      moreInfo.setBundleId(newsEntryEventId);
-      menus.add(new MenuItem().setAction("REPLY"));
-      menus.add(new MenuItem().setAction("DELETE"));
-      moreInfo.setMenuItems(menus);
-      moreInfo.setNotification(new NotificationConfig().setLevel("DEFAULT"));
-      card.setMenuItems(Collections.singletonList(new MenuItem().setAction("DELETE")));
+    //card.setNotification(new NotificationConfig().setLevel("DEFAULT"));
+    if(html != null && !html.isEmpty()) {
+      card.setHtml(html);
     } else {
-      card.setNotification(new NotificationConfig().setLevel("DEFAULT"));
-      card.setId(newsEntryEventId);
+      card.setText(text);
+    }
+    if(addDeleteMenu != null && addDeleteMenu.booleanValue()) {
       menus.add(new MenuItem().setAction("REPLY"));
       menus.add(new MenuItem().setAction("DELETE"));
       card.setMenuItems(menus);
     }
-
     try {
       timelineId = service.timeline().insert(card).execute().getId();
-      service.timeline().insert(moreInfo).execute();
     } catch (IOException e) {
       LOG.error(e);
       throw createException(e, USER_EXECUTION_ERROR, USER_EXECUTION_ERROR, null);
     }
+
+
   }
 
-  public PostTimelineItemFromNewsEventActivity(SmartServiceContext smartServiceCtx) {
+  public PostTimelineItemActivity(SmartServiceContext smartServiceCtx) {
     super();
     this.smartServiceCtx = smartServiceCtx;
   }
@@ -101,28 +94,28 @@ public class PostTimelineItemFromNewsEventActivity extends AppianSmartService {
   public void validate(MessageContainer messages) {
   }
 
-  @Input(required = Required.ALWAYS)
+  @Input(required = Required.OPTIONAL)
   @Name("authData")
   public void setAuthData(GlassAuthType val) {
     this.authData = val;
   }
 
-  @Input(required = Required.ALWAYS)
-  @Name("htmlData")
-  public void setHtmlData(String val) {
-    this.htmlData = val;
+  @Input(required = Required.OPTIONAL)
+  @Name("text")
+  public void setText(String val) {
+    this.text = val;
   }
 
   @Input(required = Required.OPTIONAL)
-  @Name("moreInfoHtmlData")
-  public void setMoreInfoHtmlData(String val) {
-    this.moreInfoHtmlData = val;
+  @Name("html")
+  public void setHtml(String val) {
+    this.html = val;
   }
 
-  @Input(required = Required.ALWAYS)
-  @Name("newsEntryEventId")
-  public void setNewsEntryEventId(String val) {
-    this.newsEntryEventId = val;
+  @Input(required = Required.OPTIONAL)
+  @Name("addDeleteMenu")
+  public void setAddDeleteMenu(Boolean val) {
+    this.addDeleteMenu = val;
   }
 
   @Name("timelineId")

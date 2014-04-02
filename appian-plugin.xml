@@ -1,4 +1,4 @@
-<appian-plugin name="Appian Plugins for Glass" key="com.appian.googleglass.plugins">
+<appian-plugin name="Appian Plugins for Glass" key="com.appian.google.glassware.plugins">
 
   <plugin-info>
     <description>Appian Plugins for Glass</description>
@@ -8,16 +8,16 @@
   </plugin-info>
 
   <datatype key="GlassAuthType" name="GlassAuthType">
-    <class>com.appian.googleglass.oauth.types.GlassAuthType</class>
+    <class>com.appian.google.glassware.oauth.types.GlassAuthType</class>
   </datatype>
 
   <smart-service name="Post TimelineItem to Glass" key="PostTimelineItemtoGlass"
-    class="com.appian.googleglass.mirror.PostTimelineItemActivity"/>
+    class="com.appian.google.glassware.mirror.PostTimelineItemActivity"/>
   <function-category key="googleGlassCategory" name="Google Glass"/>
   <function key="GetGlassAuthorizationUrlFunction"
-    class="com.appian.googleglass.mirror.auth.GetGlassAuthorizationUrlFunction"/>
+    class="com.appian.google.glassware.mirror.auth.GetGlassAuthorizationUrlFunction"/>
   <servlet name="Appian Glassware Auth Servlet" key="appianGlasswareAuthServlet"
-    class="com.appian.googleglass.mirror.auth.AppianGlasswareAuthServlet">
+    class="com.appian.google.glassware.mirror.auth.AppianGlasswareAuthServlet">
     <description>Appian Glassware Auth Servlet</description>
     <url-pattern>/ok.glass</url-pattern>
   </servlet>
@@ -28,8 +28,8 @@
   </servlet>
 
   <smart-service name="Store Glassware Credentials" key="StoreGlasswareCredentials"
-    class="com.appian.googleglass.mirror.auth.StoreGlasswareCredentialsActivity" />
+    class="com.appian.google.glassware.mirror.auth.StoreGlasswareCredentialsActivity" />
 
-  <smart-service name="Post TimelineItem from News Event" key="PostTimelineItemfromNewsEvent"
-    class="com.appian.googleglass.mirror.PostTimelineItemFromNewsEventActivity" />
+  <smart-service name="Post TimelineItem with Subscription" key="PostTimelineItemWithSubscription"
+    class="com.appian.google.glassware.mirror.PostTimelineItemWithSubscription" />
 </appian-plugin>

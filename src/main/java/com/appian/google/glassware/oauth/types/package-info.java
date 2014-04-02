@@ -6,4 +6,4 @@
 //
 
 @javax.xml.bind.annotation.XmlSchema(namespace = "http://appian.com/GoogleGlass/oauth/types")
-package com.appian.googleglass.oauth.types;
+package com.appian.google.glassware.oauth.types;

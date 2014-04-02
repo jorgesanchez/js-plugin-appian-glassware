@@ -13,15 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.appian.googleglass.mirror.auth;
+package com.appian.google.glassware.mirror.auth;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import com.appian.googleglass.mirror.AppianGlasswareUtils;
-import com.appian.googleglass.mirror.AuthUtil;
-import com.appian.googleglass.mirror.MirrorClient;
+import com.appian.google.glassware.mirror.AppianGlasswareUtils;
+import com.appian.google.glassware.mirror.AuthUtil;
+import com.appian.google.glassware.mirror.MirrorClient;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.mirror.model.Command;

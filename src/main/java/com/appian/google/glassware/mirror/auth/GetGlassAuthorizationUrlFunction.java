@@ -1,4 +1,4 @@
-package com.appian.googleglass.mirror.auth;
+package com.appian.google.glassware.mirror.auth;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,8 +7,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import com.appian.googleglass.mirror.AppianGlasswareUtils;
-import com.appian.googleglass.mirror.AuthUtil;
+import com.appian.google.glassware.mirror.AppianGlasswareUtils;
+import com.appian.google.glassware.mirror.AuthUtil;
 import com.appiancorp.services.ServiceContext;
 import com.appiancorp.suiteapi.expression.annotations.Function;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;

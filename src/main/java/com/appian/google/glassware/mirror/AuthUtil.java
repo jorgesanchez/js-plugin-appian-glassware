@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.appian.googleglass.mirror;
+package com.appian.google.glassware.mirror;
 
 import java.io.IOException;
 import java.io.InputStream;

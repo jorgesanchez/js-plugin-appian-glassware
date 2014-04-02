@@ -1,4 +1,4 @@
-package com.appian.googleglass.mirror;
+package com.appian.google.glassware.mirror;
 
 public class JdbcData {
   private String jdbcConnectionUri;

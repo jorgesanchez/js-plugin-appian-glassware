@@ -1,12 +1,12 @@
-package com.appian.googleglass.mirror.auth;
+package com.appian.google.glassware.mirror.auth;
 
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-import com.appian.googleglass.mirror.AppianGlasswareUtils;
-import com.appian.googleglass.mirror.AuthUtil;
-import com.appian.googleglass.oauth.types.GlassAuthType;
+import com.appian.google.glassware.mirror.AppianGlasswareUtils;
+import com.appian.google.glassware.mirror.AuthUtil;
+import com.appian.google.glassware.oauth.types.GlassAuthType;
 import com.appiancorp.suiteapi.common.Name;
 import com.appiancorp.suiteapi.process.exceptions.SmartServiceException;
 import com.appiancorp.suiteapi.process.framework.AppianSmartService;

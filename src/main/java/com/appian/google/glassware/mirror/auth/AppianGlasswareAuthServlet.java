@@ -1,4 +1,4 @@
-package com.appian.googleglass.mirror.auth;
+package com.appian.google.glassware.mirror.auth;
 
 import java.io.IOException;
 import java.io.PrintWriter;

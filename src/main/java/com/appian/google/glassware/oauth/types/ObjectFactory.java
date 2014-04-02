@@ -6,7 +6,7 @@
 //
 
 
-package com.appian.googleglass.oauth.types;
+package com.appian.google.glassware.oauth.types;
 
 import javax.xml.bind.annotation.XmlRegistry;
 

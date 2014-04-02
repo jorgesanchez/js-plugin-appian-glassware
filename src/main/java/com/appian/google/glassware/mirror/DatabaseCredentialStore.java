@@ -1,4 +1,4 @@
-package com.appian.googleglass.mirror;
+package com.appian.google.glassware.mirror;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
 
-import com.appian.googleglass.oauth.types.GlassAuthType;
+import com.appian.google.glassware.oauth.types.GlassAuthType;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.CredentialStore;
 
