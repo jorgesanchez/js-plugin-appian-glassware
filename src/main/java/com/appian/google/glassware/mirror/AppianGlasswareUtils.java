@@ -25,7 +25,7 @@ import com.google.api.services.mirror.model.TimelineItem;
 public class AppianGlasswareUtils {
 
   private static final Logger LOG = Logger.getLogger(AppianGlasswareUtils.class);
-  public static URL resource = DatabaseCredentialStore.class.getResource("/com/appian/googleglass/plugins/glassware.properties");
+  public static URL resource = DatabaseCredentialStore.class.getResource("/com/appian/google/glassware/plugins/glassware.properties");
 
   /**
    * Allows access to configuration parameters not available in the Appian plugin

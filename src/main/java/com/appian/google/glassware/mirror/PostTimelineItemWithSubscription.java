@@ -13,6 +13,7 @@ import com.appiancorp.suiteapi.process.exceptions.SmartServiceException;
 import com.appiancorp.suiteapi.process.framework.AppianSmartService;
 import com.appiancorp.suiteapi.process.framework.Input;
 import com.appiancorp.suiteapi.process.framework.MessageContainer;
+import com.appiancorp.suiteapi.process.framework.Order;
 import com.appiancorp.suiteapi.process.framework.Required;
 import com.appiancorp.suiteapi.process.framework.SmartServiceContext;
 import com.appiancorp.suiteapi.process.palette.PaletteInfo;
@@ -20,10 +21,13 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.services.mirror.Mirror;
 import com.google.api.services.mirror.model.MenuItem;
+import com.google.api.services.mirror.model.MenuValue;
 import com.google.api.services.mirror.model.NotificationConfig;
 import com.google.api.services.mirror.model.TimelineItem;
 
 @PaletteInfo(paletteCategory = "Integration Services", palette = "Google Glass Services")
+@Order({"authData", "htmlData", "moreInfoHtmlData", "bundleId", "addReplyMenu", "replyMenuName",
+  "addDeleteMenu", "customMenuOptions"})
 public class PostTimelineItemWithSubscription extends AppianSmartService {
 
   private static final Logger LOG = Logger.getLogger(PostTimelineItemWithSubscription.class);
@@ -70,16 +74,13 @@ public class PostTimelineItemWithSubscription extends AppianSmartService {
       moreInfo.setHtml(moreInfoHtmlData);
       moreInfo.setId(bundleId);
       moreInfo.setBundleId(bundleId);
-      menus.add(new MenuItem().setAction("REPLY"));
-      menus.add(new MenuItem().setAction("DELETE"));
-      moreInfo.setMenuItems(menus);
+      moreInfo = configureMenus(menus, moreInfo);
       moreInfo.setNotification(new NotificationConfig().setLevel("DEFAULT"));
       card.setMenuItems(Collections.singletonList(new MenuItem().setAction("DELETE")));
     } else {
       card.setNotification(new NotificationConfig().setLevel("DEFAULT"));
       card.setId(bundleId);
-      menus.add(new MenuItem().setAction("REPLY"));
-      menus.add(new MenuItem().setAction("DELETE"));
+      card = configureMenus(menus, card);
       card.setMenuItems(menus);
     }
 
@@ -90,6 +91,37 @@ public class PostTimelineItemWithSubscription extends AppianSmartService {
       LOG.error(e);
       throw createException(e, USER_EXECUTION_ERROR, USER_EXECUTION_ERROR, null);
     }
+  }
+
+  private TimelineItem configureMenus(ArrayList<MenuItem> menus, TimelineItem timelineItem) {
+    if (addReplyMenu) {
+      MenuItem reply = new MenuItem().setAction("REPLY");
+      if(replyMenuName != null && !replyMenuName.isEmpty()) {
+        MenuValue value = new MenuValue().setDisplayName(replyMenuName);
+        reply.setValues(Collections.singletonList(value));
+      }
+      menus.add(reply);
+    }
+    if (addDeleteMenu) {
+      menus.add(new MenuItem().setAction("DELETE"));
+    }
+    if (customMenuOptions != null) {
+      MenuItem customMenu;
+      for (int i = 0; i < customMenuOptions.length; i++) {
+        customMenu = new MenuItem().setAction("CUSTOM").setId(customMenuOptions[i]);
+        ArrayList<MenuValue> values = new ArrayList<MenuValue>();
+        values.add(new MenuValue().setIconUrl(
+          "https://dl.dropboxusercontent.com/s/iecf06r07sm3olb/selectItem.png")
+          .setDisplayName(customMenuOptions[i])
+          .setState("DEFAULT"));
+        customMenu.setValues(values);
+        menus.add(customMenu);
+      }
+    }
+    if (menus.size() > 0) {
+      timelineItem.setMenuItems(menus);
+    }
+    return timelineItem;
   }
 
   public PostTimelineItemWithSubscription(SmartServiceContext smartServiceCtx) {
@@ -129,22 +161,22 @@ public class PostTimelineItemWithSubscription extends AppianSmartService {
     this.bundleId = val;
   }
 
-  @Input(required = Required.ALWAYS, defaultValue="true")
+  @Input(required = Required.ALWAYS, defaultValue = "true")
   @Name("addReplyMenu")
   public void setAddReplyMenu(Boolean val) {
     this.addReplyMenu = val;
   }
 
-  @Input(required = Required.OPTIONAL, defaultValue="REPLY")
+  @Input(required = Required.OPTIONAL, defaultValue = "REPLY")
   @Name("replyMenuName")
   public void setReplyMenuName(String val) {
     this.replyMenuName = val;
   }
 
-  @Input(required = Required.ALWAYS, defaultValue="true")
+  @Input(required = Required.ALWAYS, defaultValue = "true")
   @Name("addDeleteMenu")
   public void setAddDeleteMenu(Boolean val) {
-    this.addReplyMenu = val;
+    this.addDeleteMenu = val;
   }
 
   @Input(required = Required.OPTIONAL)

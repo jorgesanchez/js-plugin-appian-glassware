@@ -85,6 +85,7 @@ public class GlasswareMirrorNotifyServlet extends HttpServlet {
       // Get the impacted timeline item
       TimelineItem timelineItem = mirrorClient.timeline().get(notification.getItemId()).execute();
       LOG.info("Notification impacted timeline item with ID: " + timelineItem.getId());
+
       // If it was a share, and contains a photo, update the photo's caption to
       // acknowledge that we got it.
       if (notification.getUserActions().contains(new UserAction().setType("SHARE")) &&
@@ -100,10 +101,62 @@ public class GlasswareMirrorNotifyServlet extends HttpServlet {
         } catch (Exception e) {
           LOG.error("There was an error launching the process", e);
         }
+      } else if ("CUSTOM".equals(notification.getUserActions().get(0).getType())) {
+        LOG.info("User clicked on a CUSTOM menu option.");
+        try {
+          handleCustomAction(timelineItem, mirrorClient, notification, userId);
+        } catch (Exception e) {
+          LOG.error("There was an error handling CUSTOM action.", e);
+        }
       } else {
-        LOG.debug("I don't know what to do with this notification, so I'm ignoring it.");
+        LOG.info("I don't know what to do with this notification, so I'm ignoring it.");
       }
     }
+  }
+
+  private void handleCustomAction(TimelineItem timelineItem, Mirror mirrorClient,
+    Notification notification, String userId) throws InvalidPriorityException,
+    InvalidVersionException, InvalidStateException, StorageLimitException, InvalidUserException,
+    IllegalArgumentException, Exception {
+    String customAction = notification.getUserActions().get(0).getPayload();
+    LOG.info("Selected option was: " + customAction +
+      ". Launching Appian process to handle CUSTOM actions.");
+    String bundleId = timelineItem.getBundleId();
+    InputStream authPropertiesStream = AppianGlasswareUtils.resource.openStream();
+    Properties glasswareProperties = new Properties();
+    glasswareProperties.load(authPropertiesStream);
+    launchProcessForCustomAction(glasswareProperties.getProperty("custom_target_pm.uuid"),
+      customAction, bundleId, AppianGlasswareUtils.getAppianUserForUserId(userId));
+    LOG.info("Information sent to Appian. Updating the TimelineItem to indicate this.");
+    timelineItem.setHtml(makeHtmlForCard("<p class='text-auto-size'>" + customAction +
+      " Received.</p>", "Custom Action processed in Appian!"));
+    timelineItem.setText(null);
+    timelineItem.setMenuItems(Collections.singletonList(new MenuItem().setAction("DELETE")));
+    mirrorClient.timeline().update(timelineItem.getId(), timelineItem).execute();
+
+  }
+
+  private void launchProcessForCustomAction(String pmUui, String customAction, String bundleId,
+    String appianUserForUserId) throws InvalidPriorityException, InvalidVersionException,
+    InvalidStateException, StorageLimitException, InvalidUserException, IllegalArgumentException,
+    Exception {
+    ServiceContext sc = ServiceLocator.getAdministratorServiceContext();
+    ProcessDesignService pds = ServiceLocator.getProcessDesignService(sc);
+    Long pmId = pds.getProcessModelIdByUuid(pmUui);
+    LOG.info("Found Model Id for UUID: " + pmId);
+    ProcessStartConfig psc = new ProcessStartConfig();
+    ProcessVariable pvAppianUserId = createRequiredParamPv("appianUserId", AppianType.STRING,
+      appianUserForUserId);
+    ProcessVariable pvBundleId = createRequiredParamPv("bundleId", AppianType.STRING, bundleId);
+    ProcessVariable pvCustomAction = createRequiredParamPv("customAction", AppianType.STRING,
+      customAction);
+    ProcessVariable[] processParams = new ProcessVariable[] {pvAppianUserId, pvBundleId,
+      pvCustomAction};
+    psc.setProcessParameters(processParams);
+    LOG.info("Starting Process with parameters: " + bundleId + "; " + appianUserForUserId + "; " +
+      customAction);
+    Long pid = pds.initiateProcess(pmId, psc);
+    LOG.info("Successfully started process to handle Glass [CUSTOM] action with pid: " + pid);
   }
 
   private void handleUserReply(TimelineItem timelineItem, Mirror mirrorClient, String userId)
@@ -111,17 +164,17 @@ public class GlasswareMirrorNotifyServlet extends HttpServlet {
     StorageLimitException, InvalidUserException, IllegalArgumentException, Exception {
     LOG.info("User replied to the timeline. Capturing the reply transcription and launching"
       + " appian process to handle");
-    String feedEventEntryId = timelineItem.getBundleId();
+    String bundleId = timelineItem.getBundleId();
     String userComments = timelineItem.getText();
 
     InputStream authPropertiesStream = AppianGlasswareUtils.resource.openStream();
     Properties glasswareProperties = new Properties();
     glasswareProperties.load(authPropertiesStream);
-    launchProcessForReply(glasswareProperties.getProperty("reply_target_pm.uuid"),
-      feedEventEntryId, userComments, AppianGlasswareUtils.getAppianUserForUserId(userId));
+    launchProcessForReply(glasswareProperties.getProperty("reply_target_pm.uuid"), bundleId,
+      userComments, AppianGlasswareUtils.getAppianUserForUserId(userId));
     LOG.info("Information sent to Appian. Updating the TimelineItem to indicate this.");
     timelineItem.setHtml(makeHtmlForCard("<p class='text-auto-size'>" + timelineItem.getText() +
-      "</p>"));
+      "</p>", "Your comments have been processed in Appian"));
     timelineItem.setText(null);
     timelineItem.setMenuItems(Collections.singletonList(new MenuItem().setAction("DELETE")));
     mirrorClient.timeline().update(timelineItem.getId(), timelineItem).execute();
@@ -238,7 +291,7 @@ public class GlasswareMirrorNotifyServlet extends HttpServlet {
     Long pmId = pds.getProcessModelIdByUuid(sharePmUUID);
     LOG.info("Found Model Id for UUID: " + pmId);
     ProcessStartConfig psc = new ProcessStartConfig();
-    ProcessVariable pvUserId = createRequiredParamPv("userId", AppianType.STRING, aeUserId);
+    ProcessVariable pvUserId = createRequiredParamPv("appianUserId", AppianType.STRING, aeUserId);
     ProcessVariable pvBundleId = createRequiredParamPv("bundleId", AppianType.STRING, bundleId);
     ProcessVariable pvCodedImg = createRequiredParamPv("sharedImageBase64String",
       AppianType.STRING, codedImg);
@@ -247,14 +300,14 @@ public class GlasswareMirrorNotifyServlet extends HttpServlet {
     LOG.info("Starting Process with parameters: " + bundleId + "; " + aeUserId +
       "; encoded img text");
     Long pid = pds.initiateProcess(pmId, psc);
-    LOG.info("Successfully started process to handle Glass [REPLY] with pid: " + pid);
+    LOG.info("Successfully started process to handle Glass [SHARE] action with pid: " + pid);
   }
 
   /**
    * Takes the target UUID of the process to launch. The process is assumed to need
    * parameters 'appianUserId', 'feedEntryEventId', 'userComments'.
    */
-  private void launchProcessForReply(String pmUui, String entryId, String comments, String userId)
+  private void launchProcessForReply(String pmUui, String bundleId, String comments, String userId)
     throws InvalidPriorityException, InvalidVersionException, InvalidStateException,
     StorageLimitException, InvalidUserException, IllegalArgumentException, Exception {
     ServiceContext sc = ServiceLocator.getAdministratorServiceContext();
@@ -262,17 +315,17 @@ public class GlasswareMirrorNotifyServlet extends HttpServlet {
     Long pmId = pds.getProcessModelIdByUuid(pmUui);
     LOG.info("Found Model Id for UUID: " + pmId);
     ProcessStartConfig psc = new ProcessStartConfig();
-    ProcessVariable appianUserId = createRequiredParamPv("appianUserId", AppianType.STRING, userId);
-    ProcessVariable feedEventEntryId = createRequiredParamPv("feedEventEntryId", AppianType.STRING,
-      entryId);
+    ProcessVariable pvAppianUserId = createRequiredParamPv("appianUserId", AppianType.STRING,
+      userId);
+    ProcessVariable pvBundleId = createRequiredParamPv("bundleId", AppianType.STRING, bundleId);
     ProcessVariable userComments = createRequiredParamPv("userComments", AppianType.STRING,
       comments);
-    ProcessVariable[] processParams = new ProcessVariable[] {appianUserId, feedEventEntryId,
+    ProcessVariable[] processParams = new ProcessVariable[] {pvAppianUserId, pvBundleId,
       userComments};
     psc.setProcessParameters(processParams);
-    LOG.info("Starting Process with parameters: " + entryId + "; " + userId + "; " + comments);
+    LOG.info("Starting Process with parameters: " + bundleId + "; " + userId + "; " + comments);
     Long pid = pds.initiateProcess(pmId, psc);
-    LOG.info("Successfully started process to handle Glass [REPLY] with pid: " + pid);
+    LOG.info("Successfully started process to handle Glass [REPLY] action with pid: " + pid);
   }
 
   private ProcessVariable createRequiredParamPv(String name, int type, Object value) {
@@ -303,9 +356,9 @@ public class GlasswareMirrorNotifyServlet extends HttpServlet {
    *          the HTML content to wrap
    * @return the wrapped HTML content
    */
-  private static String makeHtmlForCard(String content) {
-    return "<article class='auto-paginate'>" + content +
-      "<footer><p>Your comment was successfully posted to Appian.</p></footer></article>";
+  private static String makeHtmlForCard(String content, String message) {
+    return "<article class='auto-paginate'>" + content + "<footer><p>" + message +
+      "</p></footer></article>";
   }
 
 }

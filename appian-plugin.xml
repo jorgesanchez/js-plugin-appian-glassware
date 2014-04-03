@@ -22,7 +22,7 @@
     <url-pattern>/ok.glass</url-pattern>
   </servlet>
   <servlet name="Appian Glassware Notification Servlet" key="appianGlasswareNotificationServlet"
-    class="com.appian.googleglass.mirror.GlasswareMirrorNotifyServlet">
+    class="com.appian.google.glassware.mirror.GlasswareMirrorNotifyServlet">
     <description>Appian Glassware Notification Servlet</description>
     <url-pattern>/stateless/glass.notify</url-pattern>
   </servlet>

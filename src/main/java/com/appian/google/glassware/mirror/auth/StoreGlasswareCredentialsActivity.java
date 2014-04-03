@@ -45,6 +45,7 @@ public class StoreGlasswareCredentialsActivity extends AppianSmartService {
       flow.createAndStoreCredential(tokenResponse, userId);
       // The dance is done. Do our bootstrapping stuff for this user
       NewUserBootstrapper.bootstrapNewUser(userId);
+      int a= 0;
       updatedAuthData = new GlassAuthType();
       updatedAuthData.setClientId(flow.getClientId());
       updatedAuthData.setAppianUserId(authData.getUserId());

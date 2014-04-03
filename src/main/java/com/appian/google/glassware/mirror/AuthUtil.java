@@ -44,7 +44,7 @@ public class AuthUtil {
    * Creates and returns a new {@link AuthorizationCodeFlow} for this app.
    */
   public static AuthorizationCodeFlow newAuthorizationCodeFlow() throws IOException {
-    URL resource = AuthUtil.class.getResource("/com/appian/googleglass/plugins/glassware.properties");
+    URL resource = AuthUtil.class.getResource("/com/appian/google/glassware/plugins/glassware.properties");
     InputStream authPropertiesStream = resource.openStream();
     Properties authProperties = new Properties();
     authProperties.load(authPropertiesStream);

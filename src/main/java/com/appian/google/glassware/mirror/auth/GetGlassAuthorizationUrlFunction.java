@@ -22,7 +22,7 @@ public final class GetGlassAuthorizationUrlFunction {
 
   @Function
   public String GetGlassAuthorizationUrl(ServiceContext sc) throws IOException {
-    URL resource = AuthUtil.class.getResource("/com/appian/googleglass/plugins/glassware.properties");
+    URL resource = AuthUtil.class.getResource("/com/appian/google/glassware/plugins/glassware.properties");
     InputStream authPropertiesStream = resource.openStream();
     Properties authProperties = new Properties();
     authProperties.load(authPropertiesStream);

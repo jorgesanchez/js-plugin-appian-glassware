@@ -29,7 +29,7 @@ public class DatabaseCredentialStore implements CredentialStore {
 
   private static final Logger LOG = Logger.getLogger(DatabaseCredentialStore.class);
 
-  private static URL resource = DatabaseCredentialStore.class.getResource("/com/appian/googleglass/plugins/glassware.properties");
+  private static URL resource = DatabaseCredentialStore.class.getResource("/com/appian/google/glassware/plugins/glassware.properties");
 
   private JdbcData getJdbcData() throws IOException {
     JdbcData jdbcData = new JdbcData();
