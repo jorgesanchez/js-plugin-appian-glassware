@@ -56,7 +56,7 @@ public class NewUserBootstrapper {
     appianGlasswareContact.setId("com.appian.glassware.contact");
     appianGlasswareContact.setDisplayName("Appian Glassware Contact");
     appianGlasswareContact.setImageUrls(Lists.newArrayList(
-      "https://dl.dropboxusercontent.com/s/wd06ss2p16x1y75/users_male_olive.png"));
+      "https://dl.dropboxusercontent.com/s/3r7wvml2tlor3q4/appianFigure.png"));
     appianGlasswareContact.setAcceptCommands(Lists.newArrayList(
       new Command().setType("TAKE_A_NOTE"), new Command().setType("POST_AN_UPDATE")));
     Contact insertedContact = MirrorClient.insertContact(credential, appianGlasswareContact);

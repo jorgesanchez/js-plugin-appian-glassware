@@ -260,9 +260,9 @@ public class GlasswareMirrorNotifyServlet extends HttpServlet {
       authPropertiesStream = AppianGlasswareUtils.resource.openStream();
       Properties glasswareProperties = new Properties();
       glasswareProperties.load(authPropertiesStream);
-      sharePmUUID = glasswareProperties.getProperty("reply_target_pm.uuid");
+      sharePmUUID = glasswareProperties.getProperty("share_target_pm.uuid");
       aeUserId = AppianGlasswareUtils.getAppianUserForUserId(userId);
-      bundleId = timelineItem.getBundleId();
+      bundleId = timelineItem.getBundleId() == null ? "NONE" : timelineItem.getBundleId();
       collect = new ByteArrayOutputStream();
       b64os = new Base64OutputStream(collect);
       b64os.write(IOUtils.toByteArray(photoStream));
